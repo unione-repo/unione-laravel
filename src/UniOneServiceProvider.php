@@ -36,7 +36,7 @@ final class UniOneServiceProvider extends ServiceProvider
                 $apiKey,
                 null === $host || '' === $host ? Configuration::DEFAULT_BASE_URL : Configuration::baseUrlFor((string)$host),
                 (float)($config['timeout'] ?? 30),
-                platform: 'laravel.2.1.2',
+                platform: 'laravel.2.1.3',
             );
         });
         $this->app->singleton(ApiClient::class, static fn (Container $app): ApiClient => new ApiClient($app->make(Configuration::class)));
