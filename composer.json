@@ -1,6 +1,6 @@
 {
     "name": "unione-repo/unione-laravel",
-    "version": "2.2.3",
+    "version": "2.2.4",
     "description": "UniOne Web API for Laravel: API client, mail transport, webhooks",
     "type": "library",
     "license": "MIT",
@@ -14,7 +14,7 @@
     "homepage": "https://github.com/unione-repo/unione-laravel",
     "require": {
         "php": ">=8.1",
-        "unione-repo/unione-php-sdk": "^2.2.3",
+        "unione-repo/unione-php-sdk": "^2.2.4",
         "illuminate/http": "^10.0|^11.0|^12.0",
         "illuminate/mail": "^10.0|^11.0|^12.0",
         "illuminate/routing": "^10.0|^11.0|^12.0",
