@@ -10,18 +10,23 @@ use Illuminate\Support\ServiceProvider;
 use UniOne\Client\ApiClient;
 use UniOne\Client\Configuration;
 use UniOne\UniOneClient;
+use UniOne\Wrapper\Console\InstallCommand;
 use UniOne\Wrapper\Http\Controllers\WebhookController;
 use UniOne\Wrapper\Mailer\UniOneTransport;
 
 /**
  * Registers the UniOne API client (UniOneClient, ApiClient, Configuration) as singletons, the "unione" mail
- * transport and the webhook route.
+ * transport and mailer (MAIL_MAILER=unione, unless config/mail.php defines its own), the webhook route and
+ * the unione:install command.
  */
 final class UniOneServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/unione.php', 'unione');
+        if (!$this->app->configurationIsCached() && null === $this->app->make('config')->get('mail.mailers.unione')) {
+            $this->app->make('config')->set('mail.mailers.unione', ['transport' => 'unione']);
+        }
 
         $this->app->singleton(Configuration::class, static function (Container $app): Configuration {
             /** @var array{api_key?: string|null, host?: string|null, timeout?: float|int|string|null} $config */
@@ -36,7 +41,7 @@ final class UniOneServiceProvider extends ServiceProvider
                 $apiKey,
                 null === $host || '' === $host ? Configuration::DEFAULT_BASE_URL : Configuration::baseUrlFor((string)$host),
                 (float)($config['timeout'] ?? 30),
-                platform: 'laravel.2.2.4',
+                platform: 'laravel.2.3.0',
             );
         });
         $this->app->singleton(ApiClient::class, static fn (Container $app): ApiClient => new ApiClient($app->make(Configuration::class)));
@@ -48,6 +53,7 @@ final class UniOneServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([__DIR__ . '/../config/unione.php' => $this->app->configPath('unione.php')], 'unione-config');
+            $this->commands([InstallCommand::class]);
         }
 
         $this->callAfterResolving('mail.manager', function (MailManager $manager): void {

@@ -10,7 +10,7 @@ Laravel integration of the [UniOne PHP SDK](https://github.com/unione-repo/union
 
 ```bash
 composer require unione-repo/unione-laravel
-php artisan vendor:publish --tag=unione-config  # config/unione.php
+php artisan unione:install  # config/unione.php, UNIONE_API_KEY in .env
 ```
 
 Requirements: PHP 8.1+, Laravel 10–12.
@@ -29,10 +29,7 @@ Settings are read from the environment by default:
 # .env
 UNIONE_API_KEY=YOUR_API_KEY
 UNIONE_HOST=us1.unione.io
-MAIL_MAILER=unione
-
-# config/mail.php, 'mailers':
-#   'unione' => ['transport' => 'unione'],
+MAIL_MAILER=unione  # the package registers the "unione" mailer, config/mail.php needs no change
 ```
 
 `us1.unione.io` in the example is for an account on another datacenter; without the host setting the package uses `api.unione.io`.
@@ -53,8 +50,13 @@ Messages of the Laravel Mail go through [email/send](https://docs.unione.io/en/w
 
 ```php
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
-Mail::to('user@example.com')->send(new OrderShipped($order));
+try {
+    Mail::to('user@example.com')->send(new OrderShipped($order));
+} catch (TransportExceptionInterface $e) {
+    $error = $e->getPrevious();  // the ApiException of the SDK: getKind(), isRetryable(), getHint()
+}
 
 // Mailable: tags and metadata go to the API as well
 public function envelope(): Envelope
@@ -127,6 +129,10 @@ Route::post('/send', function (UniOneClient $client) {
     return ['job_id' => $response->jobId];
 });
 ```
+
+### Errors
+
+A failed send throws the `TransportException` of Symfony Mailer (an `UnrecoverableTransportException` when a repeat can not succeed and symfony/messenger is installed); its `getPrevious()` is the SDK `ApiException`: `getKind()`, `isRetryable()` (network, timeout, HTTP 429 and 5xx), `getHint()`, `getApiMessage()`. The Laravel queue retries a queued mail by its `tries` whatever the error. The API client throws the `ApiException` itself.
 
 ## No domain yet: the test sandbox domain
 
