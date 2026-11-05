@@ -2,6 +2,16 @@
 
 All notable changes of this package. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [2.4.0](https://github.com/unione-repo/unione-laravel/releases/tag/v2.4.0) - 2026-11-05
+
+### Changed
+
+- Requires PHP 8.2+ (was 8.1+). Laravel 10–12 are still supported; note that Laravel 10 and 11 are past their security support and Composer 2.9+ blocks their versions by default (security advisories).
+
+### Fixed
+
+- The tests of the CI workflow install the dependency versions that have security advisories too (they check the declared range), and fail at once on an installation error that is not about the SDK.
+
 ## [2.3.2](https://github.com/unione-repo/unione-laravel/releases/tag/v2.3.2) - 2026-11-05
 
 ### Changed

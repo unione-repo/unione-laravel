@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        v: ["8.1", "8.2", "8.3", "8.4"]
+        v: ["8.2", "8.3", "8.4"]
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -45,12 +45,20 @@ jobs:
           php-version: ${{ matrix.v }}
           tools: composer
           coverage: none
+      - name: Composer installs the versions with security advisories too (the tests check the declared range)
+        run: |
+          echo "COMPOSER_NO_BLOCKING=1" >> "$GITHUB_ENV"
+          echo "COMPOSER_NO_SECURITY_BLOCKING=1" >> "$GITHUB_ENV"
       - name: Install the dependencies (the mirrors of the registry may serve the SDK some minutes later)
         timeout-minutes: 15
         run: |
           for i in $(seq 1 20); do
-            if ( composer clear-cache -q && composer install --no-interaction --no-progress ); then exit 0; fi
-            echo "the dependencies can not be installed yet ($i/20)"; sleep 30
+            if ( composer clear-cache -q && composer install --no-interaction --no-progress ) > /tmp/install.log 2>&1; then cat /tmp/install.log; exit 0; fi
+            cat /tmp/install.log
+            if ! grep -qiF 'unione-repo/unione-php-sdk' /tmp/install.log; then
+              echo "::error::the dependencies can not be installed, not because of the SDK unione-repo/unione-php-sdk: see above"; exit 1
+            fi
+            echo "the dependencies can not be installed yet: the SDK unione-repo/unione-php-sdk ($i/20)"; sleep 30
           done
           echo "::error::the dependencies (the SDK) can not be installed in 10 min"; exit 1
       - run: |

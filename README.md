@@ -13,7 +13,7 @@ composer require unione-repo/unione-laravel
 php artisan unione:install  # config/unione.php, UNIONE_API_KEY in .env
 ```
 
-Requirements: PHP 8.1+, Laravel 10–12.
+Requirements: PHP 8.2+, Laravel 10–12.
 
 ## Configuration
 
