@@ -112,7 +112,7 @@ final class WrapperTest extends TestCase
         $config = $this->app->make(Configuration::class);
         $this->assertSame('test-key', $config->getApiKey());
         $this->assertSame(self::BASE_URL, $config->getBaseUrl());
-        $this->assertSame('laravel.2.3.0,' . ApiClient::PLATFORM, $config->getPlatform());
+        $this->assertSame('laravel.2.3.1,' . ApiClient::PLATFORM, $config->getPlatform());
     }
 
     public function testMissingApiKey(): void
@@ -138,7 +138,7 @@ final class WrapperTest extends TestCase
 
         $this->assertCount(1, $this->transport->requests);
         $request = $this->transport->requests[0];
-        $query = \http_build_query(['platform' => 'laravel.2.3.0,' . ApiClient::PLATFORM]);
+        $query = \http_build_query(['platform' => 'laravel.2.3.1,' . ApiClient::PLATFORM]);
         $this->assertSame(self::BASE_URL . '/email/send.json?' . $query, $request['url']);
         $this->assertSame('test-key', $request['headers']['X-API-KEY']);
         $message = \json_decode($request['body'], true)['message'];
